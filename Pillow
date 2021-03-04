@@ -1,0 +1,65 @@
+import PIL
+from PIL import Image
+import inspect
+from IPython.display import display
+from PIL import ImageFilter
+from PIL import ImageDraw
+from PIL import ImageEnhance
+
+PIL.__version__
+file='readonly/msi_recruitment.gif'
+image=Image.open(file)
+print(image)
+print('The type of the image is'+str(type(image)))
+inspect.getmro(type(image))
+display(image)
+
+image.save('msi_recruitment.png')
+image=Image.open('msi_recruitment.png')
+inspect.getmro(type(image))
+
+image=image.convert('RGB')
+blurred_image=image.filter(PIL.ImageFilter.BLUR)
+display(blurred_image)
+
+#crop() function
+print('{}x{}'.format(image.width, image.height))
+display(image.crop([50,0,190,150]))
+
+drawing_object=ImageDraw.Draw(image)
+drawing_object.rectangle((50,0,190,150), fill=None, outline='red')
+display(image)
+
+enhancer=ImageEnhance.Brightness(image)
+images=[]
+for i in range(0,10):
+    images.append(enhancer.enhance(i/10))
+print(images)
+
+first_image=images[0]
+contact_sheet=PIL.Image.new(first_image.mode, (first_image.width,10*first_image.height))
+current_location = 0
+for img in images:
+    # Lets paste the current image into the contact sheet
+    contact_sheet.paste(img, (0, current_location) )
+    # And update the current_location counter
+    current_location=current_location+450
+contact_sheet = contact_sheet.resize((160,900) )
+# Now lets just display that composite image
+display(contact_sheet)
+
+contact_sheet=PIL.Image.new(first_image.mode, (first_image.width*3,first_image.height*3))
+x=0
+y=0
+for img in images[1:]:
+    # Lets paste the current image into the contact sheet
+    contact_sheet.paste(img, (x, y) )
+    # Now we update our X position. If it is going to be the width of the image, then we set it to 0
+    # and update Y as well to point to the next "line" of the contact sheet.
+    if x+first_image.width == contact_sheet.width:
+        x=0
+        y=y+first_image.height
+    else:
+        x=x+first_image.width
+contact_sheet=contact_sheet.resize((900,900))
+display(contact_sheet)
