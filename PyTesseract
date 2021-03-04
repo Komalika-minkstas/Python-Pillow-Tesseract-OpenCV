@@ -1,0 +1,127 @@
+import PIL
+from PIL import Image
+import pytesseract
+import inspect
+
+image=Image.open('readonly/text.png')
+display(image)
+
+src=inspect.getsource(pytesseract.image_to_string)
+print(src)
+
+#append 2 ? at the end of a function
+pytesseract.image_to_string??
+
+text=pytesseract.image_to_string(image)
+print(text)
+
+img=Image.open('readonly/Noisy_OCR.PNG')
+display(img)
+
+text=pytesseract.image_to_string(Image.open('readonly/Noisy_OCR.PNG'))
+print(text)
+
+basewidth=600
+img=Image.open('readonly/Noisy_OCR.PNG')
+wpercent=(basewidth/float(img.size[0]))
+hsize=int(float(img.size[1]*float(wpercent)))
+img=img.resize((basewidth,hsize), PIL.Image.ANTIALIAS)
+img.save('resized_noise.png')
+display(img)
+text=pytesseract.image_to_string(img)
+print(text)
+
+img=Image.open('readonly/Noisy_OCR.PNG')
+img=img.convert('L')
+img.save('greyscale_noise.png')
+text=pytesseract.image_to_string(img)
+print(text)
+
+#Binarize
+img=Image.open('readonly/Noisy_OCR.PNG').convert('1')
+image.save('black_and_white_noisy.png')
+display(img)
+
+def binarize(image_to_transform, threshold):
+    output_image=image_to_transform.convert('L')
+    for x in range(output_image.width):
+        for y in range(output_image.height):
+            if output_image.getpixel((x,y))<threshold:
+                output_image.putpixel((x,y),0)
+            else:
+                output_image.putpixel((x,y),225)
+    return output_image
+
+for thresh in (0,257,64):
+    print("Trying with threshold"+str(thresh))
+    display(binarize(Image.open('readonly/Noisy_OCR.PNG'), thresh))
+    print(pytesseract.image_to_string(binarize(Image.open('readonly/Noisy_OCR.PNG'),thresh)))
+    
+    
+#new image
+
+image=Image.open('readonly/storefront.jpg')
+display(image)
+pytesseract.image_to_string(image)
+
+bounding_box=[315,170,700,270]
+title_image=image.crop(bounding_box)
+display(title_image)
+pytesseract.image_to_string(title_image)
+
+bounding_box=[900,420,940,445]
+little_sign=image.crop(bounding_box)
+display(little_sign)
+
+new_size=(little_sign.width*10,little_sign.height*10)
+display(little_sign.resize(new_size,Image.NEAREST))
+
+options=[Image.NEAREST, Image.BOX, Image.BILINEAR, Image.HAMMING, Image.BICUBIC, Image.LANCZOS]
+for option in options:
+    print(option)
+    display(little_sign.resize(new_size,option))
+
+bigger_sign=little_sign.resize(new_size, Image.BICUBIC)
+pytesseract.image_to_string(bigger_sign)
+
+def binarize(image_to_transform,threshold):
+    output_image=image_to_transform.convert('L')
+    for x in range(output_image.width):
+        for y in range(output_image.height):
+            if output_image.getpixel((x,y))<threshold:
+                output_image.putpixel((x,y),0)
+            else:
+                output_image.putpixel((x,y),255)
+    return output_image
+binarized_bigger_sign=binarize(bigger_sign,190)
+display(binarized_bigger_sign)
+pytesseract.image_to_string(binarized_bigger_sign)
+
+eng_dict=[]
+with open('readonly/words_alpha.txt','r') as f:
+    data=f.read()
+    eng_dict=data.split('\n')
+for i in range(150,170):
+    strng=pytesseract.image_to_string(binarize(bigger_sign,i))
+    strng=strng.lower()
+    import string
+    comparision=''
+    for character in strng:
+        if character in string.ascii_lowercase:
+            comparision=comparision+character
+        
+        if comparision in eng_dict:
+            print(comparision)
+            
+            
+            
+@interact(left=100, top=100, right=200, bottom=200)
+
+# Now we just write the function we had before
+def draw_border(left, top, right, bottom):
+    img=image.copy()
+    drawing_object=ImageDraw.Draw(img)
+    drawing_object.rectangle((left,top,right,bottom), fill = None, outline ='red')
+    display(img)
+    
+    
